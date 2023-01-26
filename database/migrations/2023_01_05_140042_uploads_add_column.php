@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('uploads', function (Blueprint $table) {
+            $table->integer('likes')->default(0)->after('public');
+            $table->integer('uploads')->default(0)->after('likes');
+
+            $table->index(['likes']);
+            $table->index(['uploads']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('uploads', function (Blueprint $table) {
+            $table->dropIndex(['uploads']);
+            $table->dropIndex(['likes']);
+            $table->dropColumn(['likes', 'uploads']);
+            //
+        });
+    }
+};

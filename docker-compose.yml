@@ -1,0 +1,80 @@
+version: '3'
+
+
+services:
+
+  #MariaDB Service
+  db:
+    image: mariadb
+    container_name: uploads_db
+    restart: unless-stopped
+    tty: true
+#    ports:
+#      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+      SERVICE_NAME: mysql
+    networks:
+      - uploads_network
+    volumes:
+      - uploads_mysql:/var/lib/mysql
+
+
+
+  #PHP Service
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: uploads/php
+    container_name: uploads_php
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "6001:6001"
+    environment:
+      SERVICE_NAME: php
+    working_dir: /var/www
+    networks:
+      - uploads_network
+    volumes:
+       - ./:/var/www
+    depends_on:
+      - db
+
+
+
+  #Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: uploads_nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8002:80"
+    networks:
+      - uploads_network
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - db
+      - php
+
+
+
+#Docker Networks
+networks:
+  uploads_network:
+    driver: bridge
+
+
+
+#Docker Volumes
+volumes:
+  uploads_mysql:
+    driver: local
+
